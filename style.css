@@ -1,0 +1,30 @@
+html, head, body {
+    margin: 0;
+    padding: 25px;
+    background-color: #2a2a2d;
+    color: #dfdfdf;
+}
+
+#demo-canvas {
+    width: 800px;
+    height: 800px;
+
+    /*
+     * This color should not appear, if the script is working correctly.
+     */
+    background-color: #ff00ff;
+}
+
+#demo-canvas-error-box {
+    color: #df8080;
+    font-weight: 500;
+    font-size: 18pt;
+    border: 1px solid white;
+    padding: 25px;
+    margin-top: 20px;
+}
+
+.demo-canvas-error-box-title {
+    color: #eeeeee;
+    border-bottom: 1px solid gray;
+}
