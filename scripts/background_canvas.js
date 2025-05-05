@@ -19,10 +19,14 @@ function helloTriangle() {
     const vao = gl.createVertexArray();
     gl.bindVertexArray(vao);
 
+    const scale = 0.02;
+    let aspectRatio = 1.0;
+
     const triangleVertices = new Float32Array([
-        0.0, 0.5, 1.0, 0.0, 0.0,
-        -0.5, -0.5, 0.0, 1.0, 0.0,
-        0.5, -0.5, 0.0, 0.0, 1.0,
+        0.0 * scale * aspectRatio, 1.0 * scale, 0.5, 1.0,
+        -1.0 * scale * aspectRatio, 0.0 * scale, 0.0, 0.5,
+        1.0 * scale * aspectRatio, 0.0 * scale, 1.0, 0.5,
+        0.0 * scale * aspectRatio, -1.0 * scale, 0.5, 0.0,
     ]);
 
     const triangleGeoBuffer = gl.createBuffer();
@@ -33,12 +37,12 @@ function helloTriangle() {
         precision mediump float;
 
         in vec2 vertexPos;
-        in vec3 vertexColor;
+        in vec2 vertexUv;
 
-        out vec3 color;
+        out vec2 uv;
         
         void main() {
-            color = vertexColor;
+            uv = vertexUv;
             gl_Position = vec4(vertexPos, 0.0, 1.0);
         }
     `;
@@ -55,12 +59,14 @@ function helloTriangle() {
     const fragmentShaderSource = `#version 300 es
         precision mediump float;
 
-        in vec3 color;
+        uniform sampler2D tex;
+
+        in vec2 uv;
 
         out vec4 outColor;
         
         void main() {
-            outColor = vec4(color, 1.0);
+            outColor = texture(tex, uv);
         }
     `;
 
@@ -84,42 +90,64 @@ function helloTriangle() {
     }
 
     const attribLocVertexPos = gl.getAttribLocation(shaderProgram, "vertexPos");
-    const attribLocVertexColor = gl.getAttribLocation(shaderProgram, "vertexColor");
+    const attribLocVertexUv = gl.getAttribLocation(shaderProgram, "vertexUv");
 
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    // Default texture, while image loads:
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([0, 0, 255, 255]));
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+
+    // Load image asynchronously:
+    const image = new Image();
+    image.src = "assets/star.png";
+    image.addEventListener('load', function() {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        console.log("Loaded!");
+    });
+
+    function setCanvasResolution() {
+        canvas.width = canvas.clientWidth * window.devicePixelRatio;
+        canvas.height = canvas.clientHeight * window.devicePixelRatio;
+
+        aspectRatio = canvas.width / canvas.height;
+    }
+    setCanvasResolution();
 
     gl.clearColor(0.1, 0.1, 0.13, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+    gl.enable(gl.DEPTH_TEST);
+
+    // This allows transparent fragments:
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.useProgram(shaderProgram);
     gl.enableVertexAttribArray(attribLocVertexPos);
-    gl.enableVertexAttribArray(attribLocVertexColor);
+    gl.enableVertexAttribArray(attribLocVertexUv);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, triangleGeoBuffer);
-    gl.vertexAttribPointer(attribLocVertexPos, 2, gl.FLOAT, false, 5 * Float32Array.BYTES_PER_ELEMENT, 0);
-    gl.vertexAttribPointer(attribLocVertexColor, 3, gl.FLOAT, false, 5 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
-
-    const scale = 0.8;
+    gl.vertexAttribPointer(attribLocVertexPos, 2, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 0);
+    gl.vertexAttribPointer(attribLocVertexUv, 2, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
 
     function drawLoop() {
-        canvas.width = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
+        setCanvasResolution();
 
         gl.viewport(0, 0, canvas.width, canvas.height);
 
-        const t = Date.now() / 10000;
-
         const triangleVertices = new Float32Array([
-            Math.cos(t) * scale, Math.sin(t) * scale, 1.0, 0.0, 0.0,
-            Math.cos(t + Math.PI * 2 / 3) * scale, Math.sin(t + Math.PI * 2 / 3) * scale, 0.0, 1.0, 0.0,
-            Math.cos(t + Math.PI * 4 / 3) * scale, Math.sin(t + Math.PI * 4 / 3) * scale, 0.0, 0.0, 1.0,
+            0.0 * scale / aspectRatio, 1.0 * scale, 0.5, 1.0,
+            -1.0 * scale / aspectRatio, 0.0 * scale, 0.0, 0.5,
+            1.0 * scale / aspectRatio, 0.0 * scale, 1.0, 0.5,
+            0.0 * scale / aspectRatio, -1.0 * scale, 0.5, 0.0,
         ]);
 
         gl.bufferData(gl.ARRAY_BUFFER, triangleVertices, gl.DYNAMIC_DRAW);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
 
     drawLoop();
