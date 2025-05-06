@@ -43,7 +43,10 @@ function helloTriangle() {
         
         void main() {
             uv = vertexUv;
-            gl_Position = vec4(vertexPos, 0.0, 1.0);
+
+            vec2 instanceOffset = vec2(float(gl_InstanceID) * 0.05, 0.0);
+
+            gl_Position = vec4(vertexPos + instanceOffset, 0.0, 1.0);
         }
     `;
 
@@ -105,7 +108,6 @@ function helloTriangle() {
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
         gl.generateMipmap(gl.TEXTURE_2D);
-        console.log("Loaded!");
     });
 
     function setCanvasResolution() {
@@ -147,7 +149,7 @@ function helloTriangle() {
         gl.bufferData(gl.ARRAY_BUFFER, triangleVertices, gl.DYNAMIC_DRAW);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, 10);
     }
 
     drawLoop();
