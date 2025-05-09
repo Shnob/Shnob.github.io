@@ -1,18 +1,30 @@
-html, head, body {
+html,
+head,
+body {
     margin: 0;
     padding: 25px;
     background-color: #1b1b21;
     color: #dfdfdf;
 }
 
-#demo-canvas {
+#demo-canvas,
+#navball-canvas {
     width: 800px;
     height: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 
     /*
      * This color should not appear, if the script is working correctly.
      */
     background-color: #ff00ff;
+}
+
+#navball-canvas {
+    width: 600px;
+    height: 600px;
+    background-color: #00000000;
 }
 
 #demo-canvas-error-box {
