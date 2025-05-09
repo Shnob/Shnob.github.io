@@ -10,16 +10,32 @@
     <canvas id="background-canvas"></canvas>
     <script src=scripts/background_canvas.js></script>
 
-    <h1>WebGL Navball</h1>
+    <h1 class="title">WebGL Navball</h1>
 
     <h6> <a href="index.html">Home</a> </h6>
 
     <canvas id="navball-canvas"></canvas>
 
-    <h2>Inspiration</h2>
-    <p>
-    TODO: Talk about KSP, KSA, and Dean Hall's discord post.
-    </p>
+    <div class="general-text">
+        <p>
+            TODO: Finish and edit this text. This text is placeholder and likely to be fully replaced. Code snippets
+            could be nice to add.<br><br>
+            The sphere you see above is supposed to resemble a <i>navball</i>.
+            The navball is central to piloting a space craft in the game <i>Kerbal Space Program</i>,
+            though my navball is designed to resemble the <i>Flight Director Attitude Indicator (FDAI)</i>
+            of the Apollo Command Module.
+            <br><br>
+            Generally when one wants to make a 3D object they would design a mesh, the geometry of the object.
+            They would then create a texture, the colours and design of the object.
+            Then they would hand these things to the graphics card of the computer to show on the screen.
+            <br><br>
+            But special thing about the example that you see above is that it exists entirely within a fragment shader.
+            What that means is the computer gives the graphics card nothing more than the square canvas that the object
+            should be rendered to.
+            The graphics card will then run a small program on every single pixel in the canvas and return a colour that
+            should be drawn on the canvas.
+        </p>
+    </div>
 
     <script src="scripts/gl-matrix-min.js"></script>
     <script src="scripts/webgl_navball.js"></script>

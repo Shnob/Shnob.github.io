@@ -7,6 +7,20 @@ body {
     color: #dfdfdf;
 }
 
+h1.title {
+    font-size: 52px;
+    text-align: center;
+}
+
+div.general-text {
+    width: min(max(50%, 25em), 60em);
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    font-family: "Open Sans", sans-serif;
+    font-size: 22px;
+}
+
 #demo-canvas,
 #navball-canvas {
     width: 800px;
@@ -22,9 +36,10 @@ body {
 }
 
 #navball-canvas {
-    width: 600px;
-    height: 600px;
+    width: 50vw;
+    height: 50vw;
     background-color: #00000000;
+    margin-bottom: 8em;
 }
 
 #demo-canvas-error-box {

@@ -31,7 +31,7 @@ function navball() {
     gl.bufferData(gl.ARRAY_BUFFER, quadVertices, gl.STATIC_DRAW);
 
     const vertexShaderSource = `#version 300 es
-        precision mediump float;
+        precision highp float;
 
         in vec2 pos;
 
@@ -53,7 +53,7 @@ function navball() {
     }
 
     const fragmentShaderSource = `#version 300 es
-        precision mediump float;
+        precision highp float;
 
         #define M_PI 3.1415926535897932384626433832795
 
