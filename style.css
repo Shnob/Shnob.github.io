@@ -22,6 +22,8 @@ body {
 }
 
 #navball-canvas {
+    width: 600px;
+    height: 600px;
     background-color: #00000000;
 }
 

@@ -61,7 +61,7 @@ function navball() {
 
         out vec4 outColor;
 
-        //uniform mat4 navballRotMat;
+        uniform mat4 navballRotMat;
 
         const float POLE_SIZE = 0.2f;
         const float POLE_RIM = 0.0125f;
@@ -70,12 +70,12 @@ function navball() {
         const int LAT_COUNT = 6;
         const float LAT_WIDTH = 0.025f;
 
-        const int LONG_TICK_COUNT = LONG_COUNT;
+        const int LONG_TICK_COUNT = LONG_COUNT * 6;
         const float LONG_TICK_LENGTH = 0.01f;
         const float LONG_TICK_WIDTH = 0.05f;
         const float LONG_TICK_CUTOFF = 0.3f;
 
-        const int LAT_TICK_COUNT = LAT_COUNT;
+        const int LAT_TICK_COUNT = LAT_COUNT * 6;
         const float LAT_TICK_LENGTH = 0.01f;
         const float LAT_TICK_WIDTH = 0.05f;
 
@@ -107,7 +107,6 @@ function navball() {
         }
 
         void main() {
-            mat4 navballRotMat = mat4(1.0);
             outColor = vec4(0.0, 0.0, 0.0, 0.0);
 
             float r = length(Pos);
@@ -167,7 +166,7 @@ function navball() {
             // These ticks follow the latitude lines, but measure longitude.
             if (!(theta < LONG_TICK_CUTOFF || theta > M_PI - LONG_TICK_CUTOFF) &&
                     mod(theta + LONG_TICK_WIDTH / 2.0 + M_PI / 2.0 / float(LAT_COUNT), M_PI / float(LAT_COUNT)) < LONG_TICK_WIDTH) {
-                float tick_len_consistent = LONG_TICK_LENGTH / sin(theta);
+                float tick_len_consistent = float(LONG_TICK_LENGTH) / sin(theta);
                 if (mod(phi + tick_len_consistent / 2.0, M_PI * 2.0 / float(LONG_TICK_COUNT)) < tick_len_consistent) {
                     isMarker = true;
                 }
@@ -175,7 +174,7 @@ function navball() {
 
             // Latitude ticks
             // These ticks follow the longitude lines, but measure latitude.
-            float tick_width_consistent = LAT_TICK_WIDTH / sin(theta);
+            float tick_width_consistent = float(LAT_TICK_WIDTH) / sin(theta);
             if (mod(phi + tick_width_consistent / 2.0 + M_PI / float(LONG_COUNT), M_PI * 2.0 / float(LONG_COUNT)) < tick_width_consistent) {
                 if (mod(theta + LAT_TICK_LENGTH / 2.0, M_PI / float(LAT_TICK_COUNT)) < LAT_TICK_LENGTH) {
                     isMarker = true;
@@ -222,6 +221,10 @@ function navball() {
     }
 
     const attribLocVertexPos = gl.getAttribLocation(shaderProgram, "pos");
+    const uniNavballRotMat = gl.getUniformLocation(shaderProgram, "navballRotMat");
+
+    let navballRotMat = glMatrix.mat4.create();
+    glMatrix.mat4.fromYRotation(navballRotMat, Math.PI * 2.0 * 1 / 3);
 
     function setCanvasResolution() {
         canvas.width = canvas.clientWidth * window.devicePixelRatio;
@@ -230,7 +233,6 @@ function navball() {
     setCanvasResolution();
 
     gl.clearColor(0.0, 0.0, 0.0, 0.0);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
 
     gl.viewport(0, 0, canvas.width, canvas.height);
 
@@ -244,7 +246,22 @@ function navball() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.vertexAttribPointer(attribLocVertexPos, 2, gl.FLOAT, false, 0, 0);
 
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+
+    function drawLoop() {
+        setCanvasResolution();
+
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT);
+
+        glMatrix.mat4.fromRotation(navballRotMat, Date.now() / 5000, [3, 2, 1]);
+        gl.uniformMatrix4fv(uniNavballRotMat, false, navballRotMat);
+
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+
+    drawLoop();
+    setInterval(drawLoop, 20);
 }
 
 try {
